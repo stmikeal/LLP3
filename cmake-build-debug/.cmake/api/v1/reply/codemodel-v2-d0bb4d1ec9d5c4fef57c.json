@@ -1,0 +1,147 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.8"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"build" : "parser_module",
+					"jsonFile" : "directory-parser_module-Debug-13f70353ae173039b5e6.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "parser_module",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "database_module",
+					"jsonFile" : "directory-database_module-Debug-6032d24ee1ed0b640bfa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "database_module",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "LLP3",
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "LLP2",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "LLP1",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "Database_lib::@74ad7140991a8ff0fda5",
+					"jsonFile" : "target-Database_lib-Debug-a7e082ef2a1accff9b63.json",
+					"name" : "Database_lib",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "LLP3::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-LLP3-Debug-b0f9230d30f8f2648123.json",
+					"name" : "LLP3",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "LLP3_1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-LLP3_1-Debug-1a44e56f861f071ccafd.json",
+					"name" : "LLP3_1",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "Xpath_lib::@7b92606eda8aafadcb7b",
+					"jsonFile" : "target-Xpath_lib-Debug-3464f52145dbce38e40d.json",
+					"name" : "Xpath_lib",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/mike/LLP/LowLevelPrograming3/cmake-build-debug",
+		"source" : "/home/mike/LLP/LowLevelPrograming3"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}
