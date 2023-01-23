@@ -102,7 +102,7 @@ enum crud_operation_status find_condition(FILE *file) {
         default: status |= !scanf("%s", s); value = (uint64_t) s; break;
     }
     struct result_list_tuple *list = NULL;
-    find_by_field(file, number, &value, &list);
+    //find_by_field(file, number, &value, &list);
     print_result_list(file, list);
     free_tree_header(header);
     free_result_list(list);

@@ -34,7 +34,7 @@ static void print_filter(struct filter_list *list) {
             while (comp_list) {
                 printf("----COMPARATOR: %zu\n", comp_level++);
                 printf("----IS NEGATIVE: %d\n", comp_list->value->negative);
-                if (comp_list->value->true) {
+                if (comp_list->value->is_true) {
                     printf("----COMPARATOR IS TRUE\n");
                 } else {
                     print_operator(comp_list->value->op1, 1);

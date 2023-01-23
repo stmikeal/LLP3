@@ -6,17 +6,10 @@
 #include "configuration.h"
 #include "time.h"
 #include "crud_tools/crud.h"
+#include "message.pb.h"
 
 int32_t read_command_line(char *buffer);
 uint64_t get_hash(char *string);
 void init_file(FILE *file);
-void time_add_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id);
-void time_add_get_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id, uint64_t id);
-void time_add_get_cond_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id);
-void time_add_remove_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id, uint64_t id);
-void time_remove_wrapper(FILE *file, uint64_t id);
-void time_add_update_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id, uint64_t id);
-void size_add_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id);
-void time_add_get_by_parent_wrapper(FILE *file, uint64_t *fields, uint64_t parent_id);
-
+uint64_t parse_request(char *filename, Query_tree tree, struct result_list_tuple **list);
 #endif

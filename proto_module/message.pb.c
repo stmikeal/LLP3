@@ -6,16 +6,19 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(Filter, Filter, 2)
+PB_BIND(Attribute, Attribute, AUTO)
 
 
-PB_BIND(Value_setting, Value_setting, AUTO)
+PB_BIND(Operator, Operator, AUTO)
 
 
 PB_BIND(Comparator, Comparator, AUTO)
 
 
-PB_BIND(Field_value_pair, Field_value_pair, AUTO)
+PB_BIND(Filter, Filter, 2)
+
+
+PB_BIND(Level, Level, 2)
 
 
 PB_BIND(Query_tree, Query_tree, 4)
@@ -24,10 +27,13 @@ PB_BIND(Query_tree, Query_tree, 4)
 PB_BIND(Return_code, Return_code, AUTO)
 
 
-PB_BIND(Attribute, Attribute, AUTO)
+PB_BIND(Entity, Entity, AUTO)
 
 
-PB_BIND(Entity, Entity, 2)
+PB_BIND(Tuple, Tuple, AUTO)
+
+
+PB_BIND(Collection, Collection, 2)
 
 
 

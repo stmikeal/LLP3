@@ -2,7 +2,7 @@
 #include "message.pb.h"
 void print_help();
 
-uint8_t loop = NULL_VALUE;
+
 
 enum commands_desc{
     ADD_COMMAND = 0,
@@ -48,11 +48,7 @@ static void print_wrong_command() {
     print_need_help();
 }
 
-static void exit_program() {
-    printf("Goodbye!\n");
-    loop++;
-}
-
+/*
 int32_t interactive_mode(struct file_config *config) {
     FILE *file;
     enum file_open_status open_status = open_file_anyway(&file, config->filename);
@@ -80,7 +76,7 @@ int32_t interactive_mode(struct file_config *config) {
     }
 
     char command[BUFFER_COMMAND_SIZE];
-    while(!loop) {
+    while(1) {
         read_command_line(command);
         switch (parse_command(command)) {
             case ADD_COMMAND: add_execute(file); break;
@@ -88,7 +84,7 @@ int32_t interactive_mode(struct file_config *config) {
             case UPDATE_COMMAND: update_execute(file); break;
             case FIND_COMMAND: find_execute(file); break;
             case HELP_COMMAND: print_help();break;
-            case EXIT_COMMAND: exit_program(); break;
+            case EXIT_COMMAND: break;
             default: print_wrong_command(); break;
         }
     }
@@ -97,7 +93,7 @@ int32_t interactive_mode(struct file_config *config) {
     close_file(file);
 
     return CRUD_OK;
-}
+}*/
 
 
 

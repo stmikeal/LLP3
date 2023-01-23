@@ -10,57 +10,73 @@
 #endif
 
 /* Struct definitions */
-typedef struct _Field_value_pair {
-    char field[16];
-    int32_t val_type;
-    bool has_int_val;
-    int64_t int_val;
-    bool has_real_val;
-    float real_val;
-} Field_value_pair;
+typedef struct _Attribute {
+    int32_t type;
+    char name[16];
+    pb_size_t which_values;
+    union {
+        char str[16];
+        int32_t integer;
+        float real;
+        int32_t int32ean;
+    } values;
+} Attribute;
 
-typedef struct _Value_setting {
-    Field_value_pair fv;
-} Value_setting;
+typedef struct _Operator {
+    int32_t field;
+    Attribute value;
+} Operator;
 
 typedef struct _Comparator {
+    int32_t negative;
+    int32_t is_true;
     int32_t operation;
-    Field_value_pair fv;
+    Operator op1;
+    Operator op2;
 } Comparator;
 
 typedef struct _Filter {
-    pb_size_t comp_list_count;
-    Comparator comp_list[20];
+    int32_t negative;
+    pb_size_t comp_count;
+    Comparator comp[5];
 } Filter;
+
+typedef struct _Level {
+    int32_t negative;
+    int32_t any;
+    int32_t parent;
+    int32_t id;
+    pb_size_t filters_count;
+    Filter filters[5];
+} Level;
 
 typedef struct _Query_tree {
     int32_t command;
-    pb_size_t filters_count;
-    Filter filters[20];
-    pb_size_t settings_count;
-    Value_setting settings[20];
+    pb_size_t level_count;
+    Level level[5];
+    char name[16];
+    int64_t value;
 } Query_tree;
 
 typedef struct _Return_code {
     int32_t code;
 } Return_code;
 
-typedef struct _Attribute {
-    pb_size_t which_values;
-    union {
-        char str[16];
-        int32_t integer;
-        float real;
-        bool boolean;
-    } values;
-} Attribute;
-
 typedef struct _Entity {
-    pb_size_t names_count;
-    char names[20][16];
     pb_size_t values_count;
-    Attribute values[20];
+    Attribute values[5];
 } Entity;
+
+typedef struct _Tuple {
+    Entity data;
+    int32_t id;
+    int32_t parent_id;
+} Tuple;
+
+typedef struct _Collection {
+    pb_size_t tuples_count;
+    Tuple tuples[5];
+} Collection;
 
 
 #ifdef __cplusplus
@@ -68,128 +84,173 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define Filter_init_default                      {0, {Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default}}
-#define Value_setting_init_default               {Field_value_pair_init_default}
-#define Comparator_init_default                  {0, Field_value_pair_init_default}
-#define Field_value_pair_init_default            {"", 0, false, 0, false, 0}
-#define Query_tree_init_default                  {0, 0, {Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default}, 0, {Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default, Value_setting_init_default}}
+#define Attribute_init_default                   {0, "", 0, {""}}
+#define Operator_init_default                    {0, Attribute_init_default}
+#define Comparator_init_default                  {0, 0, 0, Operator_init_default, Operator_init_default}
+#define Filter_init_default                      {0, 0, {Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default, Comparator_init_default}}
+#define Level_init_default                       {0, 0, 0, 0, 0, {Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default, Filter_init_default}}
+#define Query_tree_init_default                  {0, 0, {Level_init_default, Level_init_default, Level_init_default, Level_init_default, Level_init_default}, "", 0}
 #define Return_code_init_default                 {0}
-#define Attribute_init_default                   {0, {""}}
-#define Entity_init_default                      {0, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""}, 0, {Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default}}
-#define Filter_init_zero                         {0, {Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero}}
-#define Value_setting_init_zero                  {Field_value_pair_init_zero}
-#define Comparator_init_zero                     {0, Field_value_pair_init_zero}
-#define Field_value_pair_init_zero               {"", 0, false, 0, false, 0}
-#define Query_tree_init_zero                     {0, 0, {Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero}, 0, {Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero, Value_setting_init_zero}}
+#define Entity_init_default                      {0, {Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default, Attribute_init_default}}
+#define Tuple_init_default                       {Entity_init_default, 0, 0}
+#define Collection_init_default                  {0, {Tuple_init_default, Tuple_init_default, Tuple_init_default, Tuple_init_default, Tuple_init_default}}
+#define Attribute_init_zero                      {0, "", 0, {""}}
+#define Operator_init_zero                       {0, Attribute_init_zero}
+#define Comparator_init_zero                     {0, 0, 0, Operator_init_zero, Operator_init_zero}
+#define Filter_init_zero                         {0, 0, {Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero, Comparator_init_zero}}
+#define Level_init_zero                          {0, 0, 0, 0, 0, {Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero, Filter_init_zero}}
+#define Query_tree_init_zero                     {0, 0, {Level_init_zero, Level_init_zero, Level_init_zero, Level_init_zero, Level_init_zero}, "", 0}
 #define Return_code_init_zero                    {0}
-#define Attribute_init_zero                      {0, {""}}
-#define Entity_init_zero                         {0, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""}, 0, {Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero}}
+#define Entity_init_zero                         {0, {Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero, Attribute_init_zero}}
+#define Tuple_init_zero                          {Entity_init_zero, 0, 0}
+#define Collection_init_zero                     {0, {Tuple_init_zero, Tuple_init_zero, Tuple_init_zero, Tuple_init_zero, Tuple_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define Field_value_pair_field_tag               1
-#define Field_value_pair_val_type_tag            2
-#define Field_value_pair_int_val_tag             3
-#define Field_value_pair_real_val_tag            4
-#define Value_setting_fv_tag                     1
-#define Comparator_operation_tag                 1
-#define Comparator_fv_tag                        2
-#define Filter_comp_list_tag                     1
+#define Attribute_type_tag                       1
+#define Attribute_name_tag                       2
+#define Attribute_str_tag                        3
+#define Attribute_integer_tag                    4
+#define Attribute_real_tag                       5
+#define Attribute_int32ean_tag                   6
+#define Operator_field_tag                       1
+#define Operator_value_tag                       2
+#define Comparator_negative_tag                  1
+#define Comparator_is_true_tag                   2
+#define Comparator_operation_tag                 3
+#define Comparator_op1_tag                       4
+#define Comparator_op2_tag                       5
+#define Filter_negative_tag                      1
+#define Filter_comp_tag                          2
+#define Level_negative_tag                       1
+#define Level_any_tag                            2
+#define Level_parent_tag                         3
+#define Level_id_tag                             4
+#define Level_filters_tag                        5
 #define Query_tree_command_tag                   1
-#define Query_tree_filters_tag                   2
-#define Query_tree_settings_tag                  3
+#define Query_tree_level_tag                     2
+#define Query_tree_name_tag                      3
+#define Query_tree_value_tag                     4
 #define Return_code_code_tag                     1
-#define Attribute_str_tag                        1
-#define Attribute_integer_tag                    2
-#define Attribute_real_tag                       3
-#define Attribute_boolean_tag                    4
-#define Entity_names_tag                         1
-#define Entity_values_tag                        2
+#define Entity_values_tag                        1
+#define Tuple_data_tag                           1
+#define Tuple_id_tag                             2
+#define Tuple_parent_id_tag                      3
+#define Collection_tuples_tag                    1
 
 /* Struct field encoding specification for nanopb */
-#define Filter_FIELDLIST(X, a) \
-X(a, STATIC,   REPEATED, MESSAGE,  comp_list,         1)
-#define Filter_CALLBACK NULL
-#define Filter_DEFAULT NULL
-#define Filter_comp_list_MSGTYPE Comparator
+#define Attribute_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, INT32,    type,              1) \
+X(a, STATIC,   REQUIRED, STRING,   name,              2) \
+X(a, STATIC,   ONEOF,    STRING,   (values,str,values.str),   3) \
+X(a, STATIC,   ONEOF,    INT32,    (values,integer,values.integer),   4) \
+X(a, STATIC,   ONEOF,    FLOAT,    (values,real,values.real),   5) \
+X(a, STATIC,   ONEOF,    INT32,    (values,int32ean,values.int32ean),   6)
+#define Attribute_CALLBACK NULL
+#define Attribute_DEFAULT NULL
 
-#define Value_setting_FIELDLIST(X, a) \
-X(a, STATIC,   REQUIRED, MESSAGE,  fv,                1)
-#define Value_setting_CALLBACK NULL
-#define Value_setting_DEFAULT NULL
-#define Value_setting_fv_MSGTYPE Field_value_pair
+#define Operator_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, INT32,    field,             1) \
+X(a, STATIC,   REQUIRED, MESSAGE,  value,             2)
+#define Operator_CALLBACK NULL
+#define Operator_DEFAULT NULL
+#define Operator_value_MSGTYPE Attribute
 
 #define Comparator_FIELDLIST(X, a) \
-X(a, STATIC,   REQUIRED, INT32,    operation,         1) \
-X(a, STATIC,   REQUIRED, MESSAGE,  fv,                2)
+X(a, STATIC,   REQUIRED, INT32,    negative,          1) \
+X(a, STATIC,   REQUIRED, INT32,    is_true,           2) \
+X(a, STATIC,   REQUIRED, INT32,    operation,         3) \
+X(a, STATIC,   REQUIRED, MESSAGE,  op1,               4) \
+X(a, STATIC,   REQUIRED, MESSAGE,  op2,               5)
 #define Comparator_CALLBACK NULL
 #define Comparator_DEFAULT NULL
-#define Comparator_fv_MSGTYPE Field_value_pair
+#define Comparator_op1_MSGTYPE Operator
+#define Comparator_op2_MSGTYPE Operator
 
-#define Field_value_pair_FIELDLIST(X, a) \
-X(a, STATIC,   REQUIRED, STRING,   field,             1) \
-X(a, STATIC,   REQUIRED, INT32,    val_type,          2) \
-X(a, STATIC,   OPTIONAL, INT64,    int_val,           3) \
-X(a, STATIC,   OPTIONAL, FLOAT,    real_val,          4)
-#define Field_value_pair_CALLBACK NULL
-#define Field_value_pair_DEFAULT NULL
+#define Filter_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, INT32,    negative,          1) \
+X(a, STATIC,   REPEATED, MESSAGE,  comp,              2)
+#define Filter_CALLBACK NULL
+#define Filter_DEFAULT NULL
+#define Filter_comp_MSGTYPE Comparator
+
+#define Level_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, INT32,    negative,          1) \
+X(a, STATIC,   REQUIRED, INT32,    any,               2) \
+X(a, STATIC,   REQUIRED, INT32,    parent,            3) \
+X(a, STATIC,   REQUIRED, INT32,    id,                4) \
+X(a, STATIC,   REPEATED, MESSAGE,  filters,           5)
+#define Level_CALLBACK NULL
+#define Level_DEFAULT NULL
+#define Level_filters_MSGTYPE Filter
 
 #define Query_tree_FIELDLIST(X, a) \
 X(a, STATIC,   REQUIRED, INT32,    command,           1) \
-X(a, STATIC,   REPEATED, MESSAGE,  filters,           2) \
-X(a, STATIC,   REPEATED, MESSAGE,  settings,          3)
+X(a, STATIC,   REPEATED, MESSAGE,  level,             2) \
+X(a, STATIC,   REQUIRED, STRING,   name,              3) \
+X(a, STATIC,   REQUIRED, INT64,    value,             4)
 #define Query_tree_CALLBACK NULL
 #define Query_tree_DEFAULT NULL
-#define Query_tree_filters_MSGTYPE Filter
-#define Query_tree_settings_MSGTYPE Value_setting
+#define Query_tree_level_MSGTYPE Level
 
 #define Return_code_FIELDLIST(X, a) \
 X(a, STATIC,   REQUIRED, INT32,    code,              1)
 #define Return_code_CALLBACK NULL
 #define Return_code_DEFAULT NULL
 
-#define Attribute_FIELDLIST(X, a) \
-X(a, STATIC,   ONEOF,    STRING,   (values,str,values.str),   1) \
-X(a, STATIC,   ONEOF,    INT32,    (values,integer,values.integer),   2) \
-X(a, STATIC,   ONEOF,    FLOAT,    (values,real,values.real),   3) \
-X(a, STATIC,   ONEOF,    BOOL,     (values,boolean,values.boolean),   4)
-#define Attribute_CALLBACK NULL
-#define Attribute_DEFAULT NULL
-
 #define Entity_FIELDLIST(X, a) \
-X(a, STATIC,   REPEATED, STRING,   names,             1) \
-X(a, STATIC,   REPEATED, MESSAGE,  values,            2)
+X(a, STATIC,   REPEATED, MESSAGE,  values,            1)
 #define Entity_CALLBACK NULL
 #define Entity_DEFAULT NULL
 #define Entity_values_MSGTYPE Attribute
 
-extern const pb_msgdesc_t Filter_msg;
-extern const pb_msgdesc_t Value_setting_msg;
+#define Tuple_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, MESSAGE,  data,              1) \
+X(a, STATIC,   REQUIRED, INT32,    id,                2) \
+X(a, STATIC,   REQUIRED, INT32,    parent_id,         3)
+#define Tuple_CALLBACK NULL
+#define Tuple_DEFAULT NULL
+#define Tuple_data_MSGTYPE Entity
+
+#define Collection_FIELDLIST(X, a) \
+X(a, STATIC,   REPEATED, MESSAGE,  tuples,            1)
+#define Collection_CALLBACK NULL
+#define Collection_DEFAULT NULL
+#define Collection_tuples_MSGTYPE Tuple
+
+extern const pb_msgdesc_t Attribute_msg;
+extern const pb_msgdesc_t Operator_msg;
 extern const pb_msgdesc_t Comparator_msg;
-extern const pb_msgdesc_t Field_value_pair_msg;
+extern const pb_msgdesc_t Filter_msg;
+extern const pb_msgdesc_t Level_msg;
 extern const pb_msgdesc_t Query_tree_msg;
 extern const pb_msgdesc_t Return_code_msg;
-extern const pb_msgdesc_t Attribute_msg;
 extern const pb_msgdesc_t Entity_msg;
+extern const pb_msgdesc_t Tuple_msg;
+extern const pb_msgdesc_t Collection_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
-#define Filter_fields &Filter_msg
-#define Value_setting_fields &Value_setting_msg
+#define Attribute_fields &Attribute_msg
+#define Operator_fields &Operator_msg
 #define Comparator_fields &Comparator_msg
-#define Field_value_pair_fields &Field_value_pair_msg
+#define Filter_fields &Filter_msg
+#define Level_fields &Level_msg
 #define Query_tree_fields &Query_tree_msg
 #define Return_code_fields &Return_code_msg
-#define Attribute_fields &Attribute_msg
 #define Entity_fields &Entity_msg
+#define Tuple_fields &Tuple_msg
+#define Collection_fields &Collection_msg
 
 /* Maximum encoded size of messages (where known) */
-#define Attribute_size                           17
-#define Comparator_size                          57
-#define Entity_size                              720
-#define Field_value_pair_size                    44
-#define Filter_size                              1180
-#define Query_tree_size                          24631
+#define Attribute_size                           45
+#define Collection_size                          1315
+#define Comparator_size                          153
+#define Entity_size                              235
+#define Filter_size                              791
+#define Level_size                               4014
+#define Operator_size                            58
+#define Query_tree_size                          20124
 #define Return_code_size                         11
-#define Value_setting_size                       46
+#define Tuple_size                               260
 
 #ifdef __cplusplus
 } /* extern "C" */

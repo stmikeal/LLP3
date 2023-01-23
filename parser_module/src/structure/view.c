@@ -1,5 +1,5 @@
 #include "structure/view.h"
-
+#include <string.h>
 size_t size = 0;
 
 void *test_malloc(size_t size_of){
@@ -60,7 +60,7 @@ struct comparator_list *create_comparator_list(){
 struct comparator *create_comparator(){
     struct comparator *comparator = test_malloc(sizeof(struct comparator));
     comparator->negative = 0;
-    comparator->true = 0;
+    comparator->is_true = 0;
     comparator->operation = 0;
     comparator->op1 = NULL;
     comparator->op2 = NULL;
@@ -77,7 +77,7 @@ struct operator *create_operator(uint8_t field, enum field_types type, union typ
 
 struct field *create_field(size_t size, char *value){
     struct field* field = test_malloc(sizeof(struct field));
-    field->value = value;
+    strcmp(field->value, value);
     field->size = size;
     return field;
 }

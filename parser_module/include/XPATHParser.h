@@ -1,6 +1,9 @@
 #ifndef LLP3_XPATHPARSER_H
 #define LLP3_XPATHPARSER_H
+#include <inttypes.h>
+#include "parser.h"
+#include "printer.h"
 
-int parse();
+struct view *parse();
 
 #endif

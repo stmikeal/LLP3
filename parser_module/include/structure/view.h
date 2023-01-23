@@ -37,7 +37,7 @@ enum field_types {
 
 struct field {
     size_t size;
-    char *value;
+    char value[16];
 };
 
 union types {
@@ -58,7 +58,7 @@ struct operator {
 
 struct comparator {
     uint8_t negative;
-    uint8_t true;
+    uint8_t is_true;
     enum compare operation;
     struct operator *op1;
     struct operator *op2;

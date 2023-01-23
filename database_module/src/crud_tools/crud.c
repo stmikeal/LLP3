@@ -102,7 +102,7 @@ enum crud_operation_status get_tuple(uint64_t id, struct result_list_tuple **res
 }
 
 
-static uint8_t op_equal(struct operator op1, struct operator op2, struct tuple *tuple){
+static uint8_t op_equal(struct operator_type op1, struct operator_type op2, struct tuple *tuple){
     if (op1.op_type == op2.op_type) return 0;
     switch (op1.op_type) {
         case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) == (op2.is_field ? tuple->data[op2.integer] : op2.integer);
@@ -113,7 +113,7 @@ static uint8_t op_equal(struct operator op1, struct operator op2, struct tuple *
     }
 }
 
-static uint8_t op_greater(struct operator op1, struct operator op2, struct tuple *tuple){
+static uint8_t op_greater(struct operator_type op1, struct operator_type op2, struct tuple *tuple){
     if (op1.op_type == op2.op_type) return 0;
     switch (op1.op_type) {
         case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) > (op2.is_field ? tuple->data[op2.integer] : op2.integer);
@@ -123,7 +123,7 @@ static uint8_t op_greater(struct operator op1, struct operator op2, struct tuple
     }
 }
 
-static uint8_t op_less(struct operator op1, struct operator op2, struct tuple *tuple){
+static uint8_t op_less(struct operator_type op1, struct operator_type op2, struct tuple *tuple){
     if (op1.op_type == op2.op_type) return 0;
     switch (op1.op_type) {
         case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) < (op2.is_field ? tuple->data[op2.integer] : op2.integer);
@@ -133,7 +133,7 @@ static uint8_t op_less(struct operator op1, struct operator op2, struct tuple *t
     }
 }
 
-static uint8_t op_not_greater(struct operator op1, struct operator op2, struct tuple *tuple){
+static uint8_t op_not_greater(struct operator_type op1, struct operator_type op2, struct tuple *tuple){
     if (op1.op_type == op2.op_type) return 0;
     switch (op1.op_type) {
         case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) <= (op2.is_field ? tuple->data[op2.integer] : op2.integer);
@@ -143,7 +143,7 @@ static uint8_t op_not_greater(struct operator op1, struct operator op2, struct t
     }
 }
 
-static uint8_t op_not_less(struct operator op1, struct operator op2, struct tuple *tuple){
+static uint8_t op_not_less(struct operator_type op1, struct operator_type op2, struct tuple *tuple){
     if (op1.op_type == op2.op_type) return 0;
     switch (op1.op_type) {
         case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) >= (op2.is_field ? tuple->data[op2.integer] : op2.integer);
@@ -153,7 +153,7 @@ static uint8_t op_not_less(struct operator op1, struct operator op2, struct tupl
     }
 }
 
-static uint8_t op_substr(struct operator op1, struct operator op2, struct tuple *tuple){
+static uint8_t op_substr(struct operator_type op1, struct operator_type op2, struct tuple *tuple){
     if (op1.op_type == op2.op_type) return 0;
     switch (op1.op_type) {
         case STRING_TYPE: return strstr((op1.is_field ? (char *) tuple->data[op1.integer] : op1.string), (op2.is_field ? (char *) tuple->data[op2.integer] : op2.string)) != NULL;
@@ -162,7 +162,7 @@ static uint8_t op_substr(struct operator op1, struct operator op2, struct tuple 
 }
 
 
-static uint8_t  do_filter(struct operator op1, struct operator op2, enum find_operation operation, struct tuple *tuple){
+static uint8_t  do_filter(struct operator_type op1, struct operator_type op2, enum find_operation operation, struct tuple *tuple){
     switch (operation) {
         case OP_EQUAL: return op_equal(op1, op2, tuple);
         case OP_GREATER: return op_greater(op1, op2, tuple);
@@ -174,7 +174,7 @@ static uint8_t  do_filter(struct operator op1, struct operator op2, enum find_op
     }
 }
 
-enum crud_operation_status find_by_field(struct operator op1, struct operator op2, enum find_operation operation,
+enum crud_operation_status find_by_field(struct operator_type op1, struct operator_type op2, enum find_operation operation,
         struct result_list_tuple **result, struct result_list_tuple **new_result){
     struct result_list_tuple *next;
     while((*result) != NULL){

@@ -104,7 +104,7 @@ struct filter_list *create_wrap_filter_list(uint8_t negative){
 struct comparator *read_filter(char **string){
     struct comparator *comp = create_comparator();
     if (**string && **string=='!' && *(*string)++) comp->negative = 1;
-    if (**string && **string=='@' && *(*string)++) comp->true = 1;
+    if (**string && **string=='@' && *(*string)++) comp->is_true = 1;
     else {
         comp->op1 = read_operator(string);
         comp->operation = (enum compare) *(*string)++;

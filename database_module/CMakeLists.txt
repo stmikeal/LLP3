@@ -9,7 +9,7 @@ include_directories(include/iotools)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CURRENT_SOURCE_DIR .)
-set(SOURCES src/configuration.c src/main.c
+set(SOURCES src/configuration.c
         src/adv_tools/file_manager.c
         src/adv_types/tree_header_tools.c
         src/adv_types/tuple_tools.c

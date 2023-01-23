@@ -1,9 +1,8 @@
-#include "parser.h"
-#include "printer.h"
+#include "XPATHParser.h"
 
 #define MAX_COMMAND_SIZE 1024
 
-int parse(){
+struct view *parse(){
     char command[MAX_COMMAND_SIZE], *for_parse;
     enum states current_state;
     scanf("%s", command);
@@ -33,10 +32,5 @@ int parse(){
         cur_level->next = view->tree;
         view->tree = cur_level;
     }
-    print_result(current_state, for_parse, view);
-    printf("View ram: ");
-    print_ram();
-    printf("Full ram: ");
-    print_ram();
-    return 0;
+    return view;
 }
