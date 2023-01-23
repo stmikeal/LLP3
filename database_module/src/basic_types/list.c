@@ -23,7 +23,7 @@ void free_uint64_list(struct uint64_list *result){
     }
 }
 
-void append_to_result_list(struct tuple **tuple_to_add, struct result_list_tuple **result) {
+void append_to_result_list(struct tuple **tuple_to_add, struct result_list_tuple **result, uint64_t id) {
     if ((*result) == NULL) {
         *result = malloc(sizeof(struct result_list_tuple));
         (*result)->next = NULL;
@@ -33,6 +33,7 @@ void append_to_result_list(struct tuple **tuple_to_add, struct result_list_tuple
         *result = new_result;
     }
     (*result)->value = *tuple_to_add;
+    (*result)->id = id;
 }
 
 void free_result_list(struct result_list_tuple *result) {

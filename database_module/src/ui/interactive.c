@@ -1,4 +1,5 @@
 #include "ui/interactive.h"
+#include "message.pb.h"
 void print_help();
 
 uint8_t loop = NULL_VALUE;
@@ -97,6 +98,8 @@ int32_t interactive_mode(struct file_config *config) {
 
     return CRUD_OK;
 }
+
+
 
 void print_help() {
     printf("add - command to add new tuple\n");

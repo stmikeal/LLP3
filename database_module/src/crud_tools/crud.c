@@ -33,34 +33,29 @@ enum crud_operation_status add_tuple(FILE *file, uint64_t *fields, uint64_t pare
     return status;
 }
 
-enum crud_operation_status get_tuple(FILE *file, uint64_t **fields, uint64_t id) {
-    uint64_t offset;
-    id_to_offset(file, id, &offset);
-    if (offset == NULL_VALUE) return CRUD_INVALID;
-    struct tuple *cur_tuple;
+enum crud_operation_status update_tuple(FILE *file, uint64_t field_number, uint64_t *new_value, uint64_t id){
     uint32_t *types;
     size_t size;
     get_types(file, &types, &size);
+    uint64_t type = types[field_number];
+    uint64_t  offset;
+    id_to_offset(file, id, &offset);
+    struct tuple* cur_tuple;
     fseek(file, offset, SEEK_SET);
-    read_tuple(&cur_tuple, file, (uint64_t) size);
-    *fields = malloc(sizeof(uint64_t) * size);
-    for (size_t iter = 0; iter < size; iter++) {
-        if (types[iter] == STRING_TYPE) {
-            char *s;
-            read_string_from_tuple(file, &s, size, cur_tuple->data[iter]);
-            (*fields)[iter] = (uint64_t) s;
-        } else {
-            (*fields)[iter] = cur_tuple->data[iter];
-        }
+    read_tuple(&cur_tuple, file, size);
+    if (type == STRING_TYPE){
+        change_string_tuple(file, cur_tuple->data[field_number], (char *) *new_value, get_real_tuple_size(size));
+    } else {
+        cur_tuple->data[field_number] = *new_value;
+        fseek(file, offset, SEEK_SET);
+        write_tuple(file, cur_tuple, get_real_tuple_size(size));
     }
-    free(types);
     free_tuple(cur_tuple);
-    return CRUD_OK;
+    free(types);
+    return 0;
 }
 
-static enum crud_operation_status remove_recursive_tuple_with_values
-        (FILE *file, uint64_t id, uint32_t *types, size_t pattern_size) {
-
+static enum crud_operation_status remove_recursive_tuple_with_values(FILE *file, uint64_t id, uint32_t *types, size_t pattern_size) {
     uint64_t size = get_real_tuple_size(pattern_size);
     uint64_t offset = remove_from_id_array(file, id);
     if (offset == NULL_VALUE) return CRUD_INVALID;
@@ -91,61 +86,123 @@ enum crud_operation_status remove_tuple(FILE *file, uint64_t id) {
     return status;
 }
 
-
-
-enum crud_operation_status find_by_field(FILE *file, uint64_t field_number, uint64_t *condition, struct result_list_tuple **result){
-    uint32_t *types;
-    size_t size;
-    get_types(file, &types, &size);
-    uint64_t type = types[field_number];
-    struct tree_header *header = malloc(sizeof(struct tree_header));
-    size_t pos;
-    read_tree_header(header, file, &pos);
-    struct tuple* cur_tuple;
-    for(size_t i = 0; i < header->subheader->cur_id; i++){
-        if (header->id_sequence[i] == NULL_VALUE) continue;
-        fseek(file, header->id_sequence[i], SEEK_SET);
-        read_tuple(&cur_tuple, file, size);
-        if (type == STRING_TYPE){
-            char *s;
-            read_string_from_tuple(file, &s, size, cur_tuple->data[field_number]);
-            if (!strcmp(s, (char *) *condition)) {
-                append_to_result_list(&cur_tuple, result);
-            }
-            free(s);
+enum crud_operation_status get_tuple(uint64_t id, struct result_list_tuple **result, struct result_list_tuple **new_result) {
+    struct result_list_tuple *next;
+    while((*result) != NULL){
+        if (((*result)->id) == id) {
+            append_to_result_list(&((*result)->value), new_result, (*result)->id);
         } else {
-            if (cur_tuple->data[field_number] == *condition) {
-                append_to_result_list(&cur_tuple, result);
-            }
+            free_tuple((*result)->value);
         }
-
+        next = (*result)->next;
+        free(*result);
+        *result = next;
     }
-    //free_tree_header(header);
-    //free_tuple(cur_tuple);
-    //free(types);
-    return 0;
+    return CRUD_OK;
 }
 
-enum crud_operation_status find_by_parent(FILE *file, uint64_t parent_id, struct result_list_tuple **result){
-    struct tree_header *header = malloc(sizeof(struct tree_header));
-    size_t pos;
-    read_tree_header_no_id(header, file, &pos);
-    struct tuple* cur_tuple;
-    uint64_t offset;
-    for(size_t i = 0; i < header->subheader->cur_id; i++){
-        read_from_file(&offset, file, sizeof(uint64_t));
-        if (offset == NULL_VALUE) continue;
-        fseek(file, offset, SEEK_SET);
-        read_tuple(&cur_tuple, file, header->subheader->pattern_size);
-        if (cur_tuple->header.parent == parent_id) {
-            append_to_result_list(&cur_tuple, result);
-        } else {
-            free_tuple(cur_tuple);
-        }
 
+static uint8_t op_equal(struct operator op1, struct operator op2, struct tuple *tuple){
+    if (op1.op_type == op2.op_type) return 0;
+    switch (op1.op_type) {
+        case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) == (op2.is_field ? tuple->data[op2.integer] : op2.integer);
+        case BOOLEAN_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.boolean) == (op2.is_field ? tuple->data[op2.integer] : op2.boolean);
+        case FLOAT_TYPE: return (op1.is_field ? (double) tuple->data[op1.integer] : op1.real) == (op2.is_field ? (double) tuple->data[op2.integer] : op2.real);
+        case STRING_TYPE: return strcmp((op1.is_field ? (char *) tuple->data[op1.integer] : op1.string), (op2.is_field ? (char *) tuple->data[op2.integer] : op2.string));
+        default: return 0;
     }
-    free_tree_header_no_id(header);
-    return 0;
+}
+
+static uint8_t op_greater(struct operator op1, struct operator op2, struct tuple *tuple){
+    if (op1.op_type == op2.op_type) return 0;
+    switch (op1.op_type) {
+        case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) > (op2.is_field ? tuple->data[op2.integer] : op2.integer);
+        case BOOLEAN_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.boolean) > (op2.is_field ? tuple->data[op2.integer] : op2.boolean);
+        case FLOAT_TYPE: return (op1.is_field ? (double) tuple->data[op1.integer] : op1.real) > (op2.is_field ? (double) tuple->data[op2.integer] : op2.real);
+        default: return 0;
+    }
+}
+
+static uint8_t op_less(struct operator op1, struct operator op2, struct tuple *tuple){
+    if (op1.op_type == op2.op_type) return 0;
+    switch (op1.op_type) {
+        case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) < (op2.is_field ? tuple->data[op2.integer] : op2.integer);
+        case BOOLEAN_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.boolean) < (op2.is_field ? tuple->data[op2.integer] : op2.boolean);
+        case FLOAT_TYPE: return (op1.is_field ? (double) tuple->data[op1.integer] : op1.real) < (op2.is_field ? (double) tuple->data[op2.integer] : op2.real);
+        default: return 0;
+    }
+}
+
+static uint8_t op_not_greater(struct operator op1, struct operator op2, struct tuple *tuple){
+    if (op1.op_type == op2.op_type) return 0;
+    switch (op1.op_type) {
+        case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) <= (op2.is_field ? tuple->data[op2.integer] : op2.integer);
+        case BOOLEAN_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.boolean) <= (op2.is_field ? tuple->data[op2.integer] : op2.boolean);
+        case FLOAT_TYPE: return (op1.is_field ? (double) tuple->data[op1.integer] : op1.real) <= (op2.is_field ? (double) tuple->data[op2.integer] : op2.real);
+        default: return 0;
+    }
+}
+
+static uint8_t op_not_less(struct operator op1, struct operator op2, struct tuple *tuple){
+    if (op1.op_type == op2.op_type) return 0;
+    switch (op1.op_type) {
+        case INTEGER_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.integer) >= (op2.is_field ? tuple->data[op2.integer] : op2.integer);
+        case BOOLEAN_TYPE: return (op1.is_field ? tuple->data[op1.integer] : op1.boolean) >= (op2.is_field ? tuple->data[op2.integer] : op2.boolean);
+        case FLOAT_TYPE: return (op1.is_field ? (double) tuple->data[op1.integer] : op1.real) >= (op2.is_field ? (double) tuple->data[op2.integer] : op2.real);
+        default: return 0;
+    }
+}
+
+static uint8_t op_substr(struct operator op1, struct operator op2, struct tuple *tuple){
+    if (op1.op_type == op2.op_type) return 0;
+    switch (op1.op_type) {
+        case STRING_TYPE: return strstr((op1.is_field ? (char *) tuple->data[op1.integer] : op1.string), (op2.is_field ? (char *) tuple->data[op2.integer] : op2.string)) != NULL;
+        default: return 0;
+    }
+}
+
+
+static uint8_t  do_filter(struct operator op1, struct operator op2, enum find_operation operation, struct tuple *tuple){
+    switch (operation) {
+        case OP_EQUAL: return op_equal(op1, op2, tuple);
+        case OP_GREATER: return op_greater(op1, op2, tuple);
+        case OP_LESS: return op_less(op1, op2, tuple);
+        case OP_NOT_GREATER: return op_not_greater(op1, op2, tuple);
+        case OP_NOT_LESS: return op_not_less(op1, op2, tuple);
+        case OP_SUBSTR: return op_substr(op1, op2, tuple);
+        default: return 0;
+    }
+}
+
+enum crud_operation_status find_by_field(struct operator op1, struct operator op2, enum find_operation operation,
+        struct result_list_tuple **result, struct result_list_tuple **new_result){
+    struct result_list_tuple *next;
+    while((*result) != NULL){
+        if (do_filter(op1, op2, operation, (*result)->value)) {
+            append_to_result_list(&((*result)->value), new_result, (*result)->id);
+        } else {
+            free_tuple((*result)->value);
+        }
+        next = (*result)->next;
+        free(*result);
+        *result = next;
+    }
+    return CRUD_OK;
+}
+
+enum crud_operation_status find_by_parent(uint64_t parent_id, struct result_list_tuple **result, struct result_list_tuple **new_result){
+    struct result_list_tuple *next;
+    while((*result) != NULL){
+        if (((*result)->value)->header.parent == parent_id) {
+            append_to_result_list(&((*result)->value), new_result, (*result)->id);
+        } else {
+            free_tuple((*result)->value);
+        }
+        next = (*result)->next;
+        free(*result);
+        *result = next;
+    }
+    return CRUD_OK;
 }
 
 enum crud_operation_status find_all(FILE *file, struct result_list_tuple **result){
@@ -157,32 +214,10 @@ enum crud_operation_status find_all(FILE *file, struct result_list_tuple **resul
         if (header->id_sequence[i] == NULL_VALUE) continue;
         fseek(file, header->id_sequence[i], SEEK_SET);
         read_tuple(&cur_tuple, file, header->subheader->pattern_size);
-        append_to_result_list(&cur_tuple, result);
-
+        append_to_result_list(&cur_tuple, result, i);
     }
     free_tree_header(header);
-    return 0;
+    return CRUD_OK;
 }
 
 
-enum crud_operation_status update_tuple(FILE *file, uint64_t field_number, uint64_t *new_value, uint64_t id){
-    uint32_t *types;
-    size_t size;
-    get_types(file, &types, &size);
-    uint64_t type = types[field_number];
-    uint64_t  offset;
-    id_to_offset(file, id, &offset);
-    struct tuple* cur_tuple;
-    fseek(file, offset, SEEK_SET);
-    read_tuple(&cur_tuple, file, size);
-    if (type == STRING_TYPE){
-        change_string_tuple(file, cur_tuple->data[field_number], (char *) *new_value, get_real_tuple_size(size));
-    } else {
-        cur_tuple->data[field_number] = *new_value;
-        fseek(file, offset, SEEK_SET);
-        write_tuple(file, cur_tuple, get_real_tuple_size(size));
-    }
-    free_tuple(cur_tuple);
-    free(types);
-    return 0;
-}

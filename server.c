@@ -12,6 +12,10 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include "message.pb.h"
+#include "pb_encode.h"
+#include "pb_decode.h"
+#include "pb.h"
 
 #define PORT "3490"  // порт, на который будут приходить соединения
 #define BACKLOG 10     // как много может быть ожидающих соединений
@@ -29,6 +33,8 @@ void *get_in_addr(struct sockaddr *sa) {
     return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
 
+
+
 int main(void) {
     int sockfd, new_fd;  // слушаем на sock_fd, новые соединения - на new_fd
     struct addrinfo hints, *servinfo, *p;
@@ -38,6 +44,19 @@ int main(void) {
     int yes = 1;
     char s[INET6_ADDRSTRLEN];
     int rv;
+
+    Query_tree tree = {0};
+    tree.command = 43;
+    Query_tree new_tree = {0};
+    Filter filter = {.ccc = 13};
+    tree.filters[0] = filter;
+    tree.filters_count = 5;
+    uint8_t buffer[1024];
+    pb_ostream_t ostream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+    pb_encode(&ostream, Query_tree_fields, &tree);
+    pb_istream_t istream = pb_istream_from_buffer(buffer, sizeof(buffer));
+    pb_decode(&istream, Query_tree_fields, &new_tree);
+    printf("%d\n", new_tree.filters[0]);
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
