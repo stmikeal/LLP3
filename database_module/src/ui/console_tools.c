@@ -1,6 +1,7 @@
 #include "ui/console_tools.h"
 #include "message.pb.h"
 #include "view.h"
+#include "crud_tools/crud.h"
 
 uint64_t get_hash(char *string) {
     uint64_t value = INITHASH;
@@ -45,8 +46,23 @@ void init_file(FILE *file) {
     if (status) printf("Invalid init of file!");
 }
 
-size_t do_filter(FILE *file, struct result_list_tuple *list) {
-    for()
+size_t find_by_level(Level level, struct result_list_tuple **list) {
+
+}
+
+size_t do_filter(FILE *file, Query_tree tree, struct result_list_tuple **list) {
+    uint64_t parent_id = -1;
+    size_t len = 0;
+    if (tree.level_count > 1) {
+        len = find_by_level(tree.level[0], list);
+        if (len > 1) return 0;
+        parent_id = (*list)->id;
+        free_result_list(*list);
+    }
+    find_by_level(tree.level[tree.level_count > 1 ? 1 : 0], list);
+    if (parent_id >= 0) {
+        find_
+    }
 }
 
 uint64_t parse_request(char *filename, Query_tree tree, struct result_list_tuple **list){
@@ -57,8 +73,7 @@ uint64_t parse_request(char *filename, Query_tree tree, struct result_list_tuple
     read_tree_header_np(header, file);
 
     open_file_anyway(&file, filename);
-    find_all(file, list);
-    size_t len = do_filter(file, *list);
+    size_t len = do_filter(file, tree, list);
 
     switch (tree.command) {
         case CRUD_INSERT:
