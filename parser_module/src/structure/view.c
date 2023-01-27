@@ -77,7 +77,7 @@ struct operator *create_operator(uint8_t field, enum field_types type, union typ
 
 struct field *create_field(size_t size, char *value){
     struct field* field = test_malloc(sizeof(struct field));
-    strcmp(field->value, value);
+    strcpy(field->value, value);
     field->size = size;
     return field;
 }

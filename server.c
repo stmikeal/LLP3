@@ -47,7 +47,7 @@ Collection get_collection(struct result_list_tuple *list){
         collection.tuples[collection.tuples_count].parent_id = list->value->header.parent;
         collection.tuples[collection.tuples_count].data.values_count = 2;
         collection.tuples[collection.tuples_count].data.values[0].type = STRING_TYPE;
-        strcmp(collection.tuples[collection.tuples_count].data.values[0].values.str, (char *)list->value->data[0]);
+        strcpy(collection.tuples[collection.tuples_count].data.values[0].values.str, (char *)list->value->data[0]);
         collection.tuples[collection.tuples_count].data.values[1].type = INTEGER_TYPE;
         collection.tuples[collection.tuples_count].data.values[1].values.integer = list->value->data[1];
         collection.tuples_count++;

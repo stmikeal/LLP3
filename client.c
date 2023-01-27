@@ -101,7 +101,7 @@ Query_tree convert_to_message(struct view *view){
                         .comp[tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count].op1.value.type = comparator_list->value->op1->type;
                 switch (comparator_list->value->op1->type){
                     case STRING_TYPE:
-                        strcmp(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
+                        strcpy(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
                                 .comp[tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count].op1.value.values.str, comparator_list->value->op1->value.string->value);
                         break;
                     case INTEGER_TYPE: tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
@@ -113,7 +113,7 @@ Query_tree convert_to_message(struct view *view){
                     default: break;
                 }
                 if (comparator_list->value->op1->field) {
-                    strcmp(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
+                    strcpy(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
                                    .comp[tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count].op1.value.name, comparator_list->value->op1->value.string->value);
                 }
                 tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
@@ -124,7 +124,7 @@ Query_tree convert_to_message(struct view *view){
                         .comp[tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count].op2.value.type = comparator_list->value->op2->type;
                 switch (comparator_list->value->op2->type){
                     case STRING_TYPE:
-                        strcmp(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
+                        strcpy(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
                                        .comp[tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count].op2.value.values.str, comparator_list->value->op2->value.string->value);
                         break;
                     case INTEGER_TYPE: tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
@@ -136,7 +136,7 @@ Query_tree convert_to_message(struct view *view){
                     default: break;
                 }
                 if (comparator_list->value->op2->field) {
-                    strcmp(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
+                    strcpy(tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count]
                                    .comp[tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count].op2.value.name, comparator_list->value->op2->value.string->value);
                 }
                 tree.level[tree.level_count].filters[tree.level[tree.level_count].filters_count].comp_count++;
@@ -169,7 +169,7 @@ uint64_t execute(int sockfd) {
         uint64_t value;
         printf("Enter name: \n");
         scanf("%s", name);
-        strcmp(tree.name, name);
+        strcpy(tree.name, name);
         printf("Enter value: \n");
         scanf("%ld", &value);
         tree.value = value;

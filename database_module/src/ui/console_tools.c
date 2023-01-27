@@ -1,5 +1,6 @@
 #include "ui/console_tools.h"
 #include "message.pb.h"
+#include "view.h"
 
 uint64_t get_hash(char *string) {
     uint64_t value = INITHASH;
@@ -44,11 +45,70 @@ void init_file(FILE *file) {
     if (status) printf("Invalid init of file!");
 }
 
+size_t do_filter(FILE *file, struct result_list_tuple *list) {
+    for()
+}
+
 uint64_t parse_request(char *filename, Query_tree tree, struct result_list_tuple **list){
     FILE *file;
+    uint64_t code = 0;
+
+    struct tree_header *header = malloc(sizeof(struct tree_header));
+    read_tree_header_np(header, file);
+
     open_file_anyway(&file, filename);
     find_all(file, list);
-    for(size_t i = 0; i < tree.level_count; i++){
-        Level level = tree.level[i];
+    size_t len = do_filter(file, *list);
+
+    switch (tree.command) {
+        case CRUD_INSERT:
+            if (len != 1) {
+                code = 42; // Return code mean not unique result;
+                break;
+            }
+            char *str = "null";
+            uint64_t *pattern = malloc(header->subheader->pattern_size);
+            for(size_t i = 0; i < header->subheader->pattern_size; i++){
+                if (header->pattern[i]->header->type == STRING_TYPE) {
+                    pattern[i] = (uint64_t) str;
+                } else {
+                    pattern[i] = 0;
+                }
+            }
+            code = add_tuple(file, pattern, len);
+            break;
+        case CRUD_DELETE:
+            if (!len) {
+                code = 1; // Return code mean no result present;
+                break;
+            }
+            struct result_list_tuple *copy = *list;
+            while(copy != NULL){
+                remove_tuple(file, copy->id);
+                copy = copy->next;
+            }
+            break;
+        case CRUD_UPDATE:
+            if (!len) {
+                code = 1; // Return code mean no result present;
+                break;
+            }
+            int64_t index = -1;
+            for(int64_t i = 0; i < header->subheader->pattern_size; i++){
+                if (strcmp(header->pattern[i]->key_value, tree.name) == 0) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index < 0) return 13; // Return code mean invalid field name;
+            struct result_list_tuple *copy2 = *list;
+            while(copy2 != NULL){
+                update_tuple(file, index, (uint64_t *)&tree.value, copy2->id);
+                copy2 = copy2->next;
+            }
+        default: break;
     }
+    free_result_list(*list);
+    close_file(file);
+    return code;
 }
